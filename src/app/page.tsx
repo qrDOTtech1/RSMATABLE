@@ -54,19 +54,24 @@ export default function SocialLanding() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {modes.map((mode) => (
-            <motion.div
-              key={mode.id}
-              whileHover={{ scale: 1.02 }}
-              className="relative group cursor-pointer overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8"
+            <Link 
+              key={mode.id} 
+              href="/login"
+              className="block"
             >
-              <div className={`absolute inset-0 bg-gradient-to-br ${mode.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
-              <mode.icon className="w-12 h-12 mb-6 text-white group-hover:scale-110 transition-transform" />
-              <h3 className="text-2xl font-bold mb-3">{mode.label}</h3>
-              <p className="text-white/60 leading-relaxed mb-8">{mode.desc}</p>
-              <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-white/40 group-hover:text-white transition-colors">
-                Découvrir <ArrowRight className="w-4 h-4" />
-              </div>
-            </motion.div>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                className="relative group cursor-pointer overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-8 h-full"
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${mode.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
+                <mode.icon className="w-12 h-12 mb-6 text-white group-hover:scale-110 transition-transform" />
+                <h3 className="text-2xl font-bold mb-3">{mode.label}</h3>
+                <p className="text-white/60 leading-relaxed mb-8 text-sm">{mode.desc}</p>
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/40 group-hover:text-white transition-colors mt-auto">
+                  Découvrir <ArrowRight className="w-4 h-4" />
+                </div>
+              </motion.div>
+            </Link>
           ))}
         </div>
 
