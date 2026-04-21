@@ -11,4 +11,7 @@ All notable changes to this project will be documented in this file.
 - **Landing Page**: Modern, dark-themed UI highlighting the three social modes.
 - **Onboarding**: Multi-step profiling questionnaire (interests, bio, occupation).
 - **Social Dashboard**: Main interface to see nearby people, matching scores, and real-time pings.
-- **Real-time Integration**: Connected to API Socket.io for instant social notifications.
+### Fixed
+- **Landing Page**: Fixed "Lancer l'expérience" button which was not clickable.
+- **Navigation**: Added dedicated `/login` page for Google authentication.
+- **Build**: Resolved Prisma schema conflicts with the main API.
