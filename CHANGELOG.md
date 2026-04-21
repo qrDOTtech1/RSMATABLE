@@ -9,4 +9,6 @@ All notable changes to this project will be documented in this file.
 - **Social Schema**: Database models for `SocialProfile`, `SocialPing`, and `SocialMode` (BUSINESS, FUN, DATE).
 - **Authentication**: Integrated NextAuth with Google Provider and Prisma Adapter.
 - **Landing Page**: Modern, dark-themed UI highlighting the three social modes.
-- **IA Matching**: Prepared `onboardingData` field for Nova Context Engine integration.
+- **Onboarding**: Multi-step profiling questionnaire (interests, bio, occupation).
+- **Social Dashboard**: Main interface to see nearby people, matching scores, and real-time pings.
+- **Real-time Integration**: Connected to API Socket.io for instant social notifications.
