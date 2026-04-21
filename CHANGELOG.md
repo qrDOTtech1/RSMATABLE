@@ -11,6 +11,9 @@ All notable changes to this project will be documented in this file.
 - **Landing Page**: Modern, dark-themed UI highlighting the three social modes.
 - **Onboarding**: Multi-step profiling questionnaire (interests, bio, occupation).
 - **Spotify-Style Dashboard**: Implemented a "Culinary Flow" interface to browse partner restaurants, see live activity streams, and access Nova matching features.
+- **Email Authentication**: Added support for passwordless email login (Magic Link).
+- **Authentication Improvements**: Dedicated `/login` page with Email and Google options.
+- **Environment Configuration**: Added `.env.example` with all required social module variables.
 - **Real-time Integration**: Connected to API Socket.io for instant social notifications.
 ### Fixed
 - **Landing Page**: Fixed "Lancer l'expérience" button which was not clickable.
