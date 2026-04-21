@@ -1,217 +1,182 @@
-"use client";
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Briefcase, Heart, PartyPopper, Zap, MessageSquare, User } from "lucide-react";
-import { io, Socket } from "socket.io-client";
+import { prisma } from "@/lib/db";
 
-// Assume these are provided via context or props in a real app
-const API_URL = "http://localhost:8080"; // To be updated with Railway URL
+// Force le rendu dynamique pour avoir les dernières données
+export const dynamic = "force-dynamic";
 
-interface Person {
-  id: string;
-  name: string;
-  image?: string;
-  occupation?: string;
-  interests: string[];
-  activeMode: string;
-  bio?: string;
-  matchScore?: number;
-  icebreaker?: string;
-}
+export default async function SocialDashboard() {
+  // Récupération des restaurants partenaires avec leurs notes moyennes
+  const restaurants = await prisma.restaurant.findMany({
+    include: {
+      dishReviews: true,
+    },
+    take: 20,
+  });
 
-export default function SocialDashboard() {
-  const [nearby, setNearby] = useState<Person[]>([]);
-  const [activeMode, setActiveMode] = useState("BUSINESS");
-  const [loading, setLoading] = useState(true);
-  const [pings, setPings] = useState<any[]>([]);
-
-  useEffect(() => {
-    // 1. Load nearby people (Mocking restaurantId for now)
-    const restaurantId = "demo-resto-uuid"; 
-    fetch(`${API_URL}/api/social/nearby/${restaurantId}`)
-      .then(res => res.json())
-      .then(data => {
-        setNearby(data.nearby);
-        setLoading(false);
-      });
-
-    // 2. Setup Socket.io for real-time pings
-    const sessionId = "current-session-id"; // Get from localStorage/Auth
-    const socket: Socket = io(API_URL, { auth: { sessionId } });
-    
-    socket.on("social:ping", (ping) => {
-      setPings(prev => [ping, ...prev]);
-      // Play a subtle notification sound
-      new Audio("https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3").play().catch(() => {});
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
+  // Simulation d'un flux d'avis récents sur la plateforme
+  const recentReviews = await prisma.dishReview.findMany({
+    take: 10,
+    orderBy: { createdAt: "desc" },
+    include: {
+      restaurant: true,
+      menuItem: true,
+    }
+  });
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 pb-32">
-      <header className="flex justify-between items-center mb-10">
-        <div>
-          <h1 className="text-3xl font-black">Nova <span className="text-orange-500">Connect</span></h1>
-          <p className="text-slate-500 text-sm">Session au Restaurant "Le Comptoir"</p>
+    <div className="min-h-screen bg-[#0a0a0a] text-white p-4 md:p-8 pb-32 selection:bg-orange-500/30 font-sans">
+      {/* Sidebar Simulée (Style Spotify) */}
+      <div className="fixed left-0 top-0 bottom-0 w-64 bg-black border-r border-white/5 hidden lg:flex flex-col p-6 space-y-8">
+        <div className="text-xl font-black tracking-tighter">MA <span className="text-orange-500">TABLE</span></div>
+        <nav className="space-y-4">
+          <NavItem icon="🏠" label="Accueil" active />
+          <NavItem icon="🔍" label="Rechercher" />
+          <NavItem icon="🧭" label="Découvrir" />
+          <NavItem icon="✨" label="Nova Connect" />
+        </nav>
+        <div className="pt-8">
+          <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-4">Vos Favoris</p>
+          <div className="space-y-3">
+             <div className="text-sm text-white/60 hover:text-white cursor-pointer">Le Bistro du Coin</div>
+             <div className="text-sm text-white/60 hover:text-white cursor-pointer">Sushi Master</div>
+          </div>
         </div>
-        <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center font-bold">
-          JD
-        </div>
-      </header>
-
-      {/* Mode Selector */}
-      <div className="flex gap-2 mb-8 overflow-x-auto pb-2 no-scrollbar">
-        {[
-          { id: "BUSINESS", icon: Briefcase, label: "Business" },
-          { id: "DATE", icon: Heart, label: "Date" },
-          { id: "FUN", icon: PartyPopper, label: "Fun" },
-        ].map(m => (
-          <button
-            key={m.id}
-            onClick={() => setActiveMode(m.id)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-full border transition-all shrink-0 ${
-              activeMode === m.id ? "bg-white text-black border-white" : "bg-transparent text-white/50 border-white/10"
-            }`}
-          >
-            <m.icon className="w-4 h-4" />
-            <span className="text-sm font-bold">{m.label}</span>
-          </button>
-        ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Nearby List */}
+      {/* Main Content */}
+      <main className="lg:ml-64 max-w-7xl mx-auto space-y-12">
+        
+        {/* Header Hero */}
+        <header className="relative h-64 rounded-3xl overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-rose-600 opacity-80 group-hover:scale-105 transition-transform duration-700" />
+          <div className="relative z-10 p-10 h-full flex flex-col justify-end">
+            <h1 className="text-5xl font-black tracking-tight mb-2">VOTRE FLOW CULINAIRE.</h1>
+            <p className="text-white/80 font-medium">L'IA Nova a sélectionné les meilleures tables pour votre humeur actuelle.</p>
+          </div>
+        </header>
+
+        {/* Restaurants Grid (Style Spotify Albums) */}
         <section>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              Autour de vous <span className="text-xs bg-white/10 px-2 py-0.5 rounded-full text-slate-400 font-mono">{nearby.length}</span>
-            </h2>
+            <h2 className="text-2xl font-bold tracking-tight">Nos Partenaires <span className="text-orange-500">Premium</span></h2>
+            <button className="text-xs font-bold text-white/40 hover:text-white uppercase tracking-widest transition-colors">Tout afficher</button>
           </div>
-          
-          <div className="space-y-4">
-            {loading ? (
-              <div className="animate-pulse space-y-4">
-                {[1,2,3].map(i => <div key={i} className="h-24 bg-white/5 rounded-2xl" />)}
-              </div>
-            ) : nearby.length === 0 ? (
-              <div className="text-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/10">
-                <Ghost className="w-12 h-12 mx-auto mb-4 text-white/20" />
-                <p className="text-slate-500">Personne n'est actif en mode {activeMode} ici.</p>
-              </div>
-            ) : (
-              nearby.map(person => (
-                <motion.div
-                  key={person.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="bg-white/5 border border-white/10 rounded-2xl p-4 hover:bg-white/[0.08] transition-all group"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center overflow-hidden">
-                      {person.image ? <img src={person.image} className="w-full h-full object-cover" /> : <User className="text-white/20" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start">
-                        <h3 className="font-bold truncate">{person.name}</h3>
-                        {person.matchScore && (
-                          <span className="text-[10px] font-black text-orange-500 bg-orange-500/10 px-1.5 py-0.5 rounded uppercase flex items-center gap-1">
-                            <Zap className="w-2.5 h-2.5 fill-current" /> {person.matchScore}% match
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-slate-400 truncate">{person.occupation || "Épicurien"}</p>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {person.interests.slice(0, 3).map(tag => (
-                          <span key={tag} className="text-[9px] px-1.5 py-0.5 bg-white/5 rounded text-slate-300">#{tag}</span>
-                        ))}
-                      </div>
-                    </div>
-                    <button className="bg-orange-600 hover:bg-orange-500 p-2.5 rounded-xl self-center transition-colors">
-                      <Zap className="w-4 h-4 fill-current" />
-                    </button>
-                  </div>
-                </motion.div>
-              ))
-            )}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {restaurants.map((r) => (
+              <RestaurantCard key={r.id} restaurant={r} />
+            ))}
           </div>
         </section>
 
-        {/* Real-time Notifications / Pings */}
-        <section className="space-y-6">
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            Interactions <MessageSquare className="w-5 h-5 text-blue-500" />
-          </h2>
-          
-          <div className="space-y-3">
-            <AnimatePresence>
-              {pings.map(ping => (
-                <motion.div
-                  key={ping.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="p-4 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center gap-3"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center font-bold text-blue-400">
-                    {ping.senderName[0]}
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-white">{ping.senderName} vous a envoyé un Ping !</p>
-                    <p className="text-xs text-slate-400 italic">"{ping.message || "Engageons la conversation..."}"</p>
-                  </div>
-                  <button className="text-xs font-bold text-blue-400 hover:text-blue-300">RÉPONDRE</button>
-                </motion.div>
+        {/* Flux d'avis (Activity Stream) */}
+        <section className="grid grid-cols-1 xl:grid-cols-3 gap-12">
+          <div className="xl:col-span-2 space-y-6">
+            <h2 className="text-2xl font-bold tracking-tight italic text-transparent bg-clip-text bg-gradient-to-r from-white to-white/30">L'Actu des Assiettes.</h2>
+            <div className="space-y-4">
+              {recentReviews.map((review) => (
+                <ReviewItem key={review.id} review={review} />
               ))}
-            </AnimatePresence>
-            
-            {pings.length === 0 && (
-              <p className="text-center py-10 text-slate-500 text-sm italic">Aucun nouveau ping pour le moment.</p>
-            )}
+            </div>
+          </div>
+
+          {/* Sidebar Droite - Matching IA */}
+          <div className="space-y-8">
+             <div className="bg-white/5 rounded-3xl p-6 border border-white/10">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <span className="text-orange-500">✨</span> Nova Match
+                </h3>
+                <p className="text-sm text-white/40 mb-6">3 personnes partagent vos goûts pour le <span className="text-white">Bordeaux</span> à proximité.</p>
+                <button className="w-full py-3 bg-orange-600 hover:bg-orange-500 rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-orange-600/20">
+                  Lancer Nova Connect
+                </button>
+             </div>
           </div>
         </section>
-      </div>
+      </main>
 
-      {/* Persistent Social Bar for the main App */}
-      <div className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/10 p-4">
-        <div className="max-w-xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+      {/* "Now Playing" Bar (Social Footer) */}
+      <div className="fixed bottom-0 left-0 right-0 h-24 bg-[#121212]/90 backdrop-blur-xl border-t border-white/5 z-50 px-6 flex items-center justify-between">
+         <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-slate-800 rounded-lg flex items-center justify-center text-2xl shadow-lg">🍕</div>
+            <div className="hidden sm:block">
+              <div className="font-bold text-sm">Pizza Margherita</div>
+              <div className="text-xs text-white/40">Mamma Mia Restaurant</div>
             </div>
-            <div>
-              <p className="text-xs font-bold">Mode {activeMode} Actif</p>
-              <p className="text-[10px] text-slate-500">Visible par 4 personnes à proximité</p>
+         </div>
+         
+         <div className="flex-1 max-w-md mx-8 hidden md:block">
+            <div className="flex items-center justify-center gap-6 mb-2">
+               <span className="text-white/40 hover:text-white cursor-pointer transition-colors">⏮️</span>
+               <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black text-xs font-black cursor-pointer hover:scale-105 transition-transform">GO</div>
+               <span className="text-white/40 hover:text-white cursor-pointer transition-colors">⏭️</span>
             </div>
-          </div>
-          <button className="bg-white text-black px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider">
-            Changer
-          </button>
-        </div>
+            <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+               <div className="h-full bg-orange-500 w-1/3" />
+            </div>
+         </div>
+
+         <div className="flex items-center gap-4">
+            <button className="p-2 text-white/40 hover:text-white transition-colors">💬</button>
+            <button className="p-2 text-white/40 hover:text-white transition-colors">⚙️</button>
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 p-[2px]">
+               <div className="w-full h-full bg-black rounded-full flex items-center justify-center text-[10px] font-bold">ME</div>
+            </div>
+         </div>
       </div>
     </div>
   );
 }
 
-function Ghost(props: any) {
+function NavItem({ icon, label, active = false }: { icon: string; label: string; active?: boolean }) {
   return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M9 10h.01" />
-      <path d="M15 10h.01" />
-      <path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z" />
-    </svg>
+    <div className={`flex items-center gap-4 cursor-pointer transition-all ${active ? "text-white" : "text-white/40 hover:text-white"}`}>
+      <span className="text-xl">{icon}</span>
+      <span className="text-sm font-bold">{label}</span>
+    </div>
+  );
+}
+
+function RestaurantCard({ restaurant }: { restaurant: any }) {
+  const avgRating = restaurant.dishReviews.length > 0 
+    ? (restaurant.dishReviews.reduce((acc: number, r: any) => acc + r.rating, 0) / restaurant.dishReviews.length).toFixed(1)
+    : "—";
+
+  return (
+    <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5 hover:bg-white/[0.08] transition-all group cursor-pointer">
+      <div className="relative aspect-square mb-4 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center text-4xl shadow-2xl">
+        {restaurant.logoUrl ? <img src={restaurant.logoUrl} className="w-full h-full object-cover" /> : "🍽️"}
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+           <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white text-xl shadow-xl scale-90 group-hover:scale-100 transition-transform">
+             ✨
+           </div>
+        </div>
+      </div>
+      <h3 className="font-bold truncate text-sm mb-1">{restaurant.name}</h3>
+      <p className="text-[10px] text-white/40 uppercase font-black tracking-widest flex items-center gap-2">
+        ⭐ {avgRating} • {restaurant.city || "France"}
+      </p>
+    </div>
+  );
+}
+
+function ReviewItem({ review }: { review: any }) {
+  return (
+    <div className="bg-white/[0.02] border border-white/5 p-5 rounded-2xl flex gap-4 hover:bg-white/[0.04] transition-all">
+      <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center font-bold text-xs shrink-0">
+        {review.name?.[0] || "U"}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-sm font-bold text-white/90">
+            <span className="text-orange-500">@user</span> a adoré le <span className="italic">{review.menuItem.name}</span>
+          </p>
+          <span className="text-[10px] text-white/20">{new Date(review.createdAt).toLocaleDateString()}</span>
+        </div>
+        <p className="text-xs text-white/50 line-clamp-2 leading-relaxed mb-3">"{review.comment || "Pas de commentaire, juste du plaisir."}"</p>
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 bg-white/5 rounded flex items-center justify-center text-[10px]">🏠</div>
+          <span className="text-[10px] text-white/30 font-bold uppercase tracking-tighter">{review.restaurant.name}</span>
+        </div>
+      </div>
+    </div>
   );
 }

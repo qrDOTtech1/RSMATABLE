@@ -10,7 +10,8 @@ All notable changes to this project will be documented in this file.
 - **Authentication**: Integrated NextAuth with Google Provider and Prisma Adapter.
 - **Landing Page**: Modern, dark-themed UI highlighting the three social modes.
 - **Onboarding**: Multi-step profiling questionnaire (interests, bio, occupation).
-- **Social Dashboard**: Main interface to see nearby people, matching scores, and real-time pings.
+- **Spotify-Style Dashboard**: Implemented a "Culinary Flow" interface to browse partner restaurants, see live activity streams, and access Nova matching features.
+- **Real-time Integration**: Connected to API Socket.io for instant social notifications.
 ### Fixed
 - **Landing Page**: Fixed "Lancer l'expérience" button which was not clickable.
 - **Navigation**: Added dedicated `/login` page for Google authentication.
