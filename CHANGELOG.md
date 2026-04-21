@@ -17,5 +17,6 @@ All notable changes to this project will be documented in this file.
 - **Real-time Integration**: Connected to API Socket.io for instant social notifications.
 ### Fixed
 - **Landing Page**: Fixed "Lancer l'expérience" button which was not clickable.
-- **Navigation**: Added dedicated `/login` page for Google authentication.
-- **Build**: Resolved Prisma schema conflicts with the main API.
+- **Navigation**: Added dedicated `/login` page for Google and Email authentication.
+- **Build**: Resolved missing `lib/db` module and Prisma schema conflicts.
+- **UI**: Made mode cards clickable on the landing page for better UX.
