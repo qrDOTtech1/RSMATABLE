@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Briefcase, Heart, PartyPopper, ArrowRight } from "lucide-react";
 
 export default function SocialLanding() {
@@ -24,9 +25,9 @@ export default function SocialLanding() {
         </span>
         <div className="flex items-center gap-4">
           <span className="hidden md:inline text-xs text-white/30 font-mono">matable.app</span>
-          <button className="bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-full text-sm font-medium transition-all">
-            Se connecter
-          </button>
+          <Link href="/login" className="bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-2 rounded-full text-sm font-bold transition-all">
+            Connexion
+          </Link>
         </div>
       </nav>
 
@@ -70,9 +71,9 @@ export default function SocialLanding() {
         </div>
 
         <div className="mt-32 text-center">
-          <div className="inline-flex items-center gap-4 bg-orange-600 hover:bg-orange-500 text-white px-10 py-6 rounded-2xl font-black text-2xl transition-all hover:scale-105 shadow-2xl shadow-orange-600/20 cursor-pointer">
+          <Link href="/login" className="inline-flex items-center gap-4 bg-orange-600 hover:bg-orange-500 text-white px-10 py-6 rounded-2xl font-black text-2xl transition-all hover:scale-105 shadow-2xl shadow-orange-600/20 cursor-pointer">
             LANCER L'EXPÉRIENCE <ArrowRight className="w-6 h-6" />
-          </div>
+          </Link>
           <p className="mt-6 text-white/30 text-sm">
             Connexion Google sécurisée. Vos données sont protégées par Nova Context Engine.
           </p>
