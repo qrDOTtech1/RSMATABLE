@@ -19,12 +19,15 @@ export default function SocialLanding() {
       </div>
 
       <nav className="relative z-10 p-6 flex justify-between items-center">
-        <span className="text-2xl font-black tracking-tighter">
-          MA TABLE <span className="text-orange-500">RS</span>
+        <span className="text-2xl font-black tracking-tighter uppercase">
+          MA <span className="text-orange-500">TABLE</span>
         </span>
-        <button className="bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-full text-sm font-medium transition-all">
-          Se connecter
-        </button>
+        <div className="flex items-center gap-4">
+          <span className="hidden md:inline text-xs text-white/30 font-mono">matable.app</span>
+          <button className="bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-full text-sm font-medium transition-all">
+            Se connecter
+          </button>
+        </div>
       </nav>
 
       <main className="relative z-10 max-w-6xl mx-auto px-6 pt-20 pb-32">
@@ -43,7 +46,7 @@ export default function SocialLanding() {
             transition={{ delay: 0.2 }}
             className="text-xl text-white/50 max-w-2xl mx-auto mb-12"
           >
-            MaTable RS transforme chaque restaurant en un réseau social vivant. 
+            Ma Table transforme chaque restaurant en un réseau social vivant. 
             Utilisez la puissance de Nova IA pour rencontrer les bonnes personnes, au bon moment.
           </motion.p>
         </div>
@@ -78,11 +81,11 @@ export default function SocialLanding() {
 
       <footer className="relative z-10 border-t border-white/5 py-12 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 opacity-30 text-sm">
-          <span>© 2026 MaTable RS — NovaTech OS Ecosystem</span>
-          <div className="flex gap-8">
+          <span>© 2026 Ma Table — NovaTech OS Ecosystem</span>
+          <div className="flex gap-8 font-mono text-xs">
+            <span className="text-orange-500">matable.app</span>
             <a>Confidentialité</a>
             <a>IA Ethique</a>
-            <a>API Social</a>
           </div>
         </div>
       </footer>
