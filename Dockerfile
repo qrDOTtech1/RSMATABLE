@@ -5,7 +5,7 @@ WORKDIR /app
 # Install dependencies only when needed
 FROM base AS deps
 RUN apt-get update -y && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
-COPY package.json package-lock.json* ./
+COPY package.json package-lock.json* .npmrc* ./
 RUN npm ci --omit=dev
 
 # Rebuild the source code only when needed
@@ -14,7 +14,6 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
-RUN npx prisma db push --accept-data-loss
 RUN npm run build
 
 # Production image, copy all the files and run next
