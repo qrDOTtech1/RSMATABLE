@@ -24,7 +24,7 @@ type Favorite = {
 };
 
 type Reservation = {
-  id: string; date: string; partySize: number; status: string;
+  id: string; startsAt: string; partySize: number; status: string;
   restaurant: { id: string; name: string; city: string | null; logoUrl: string | null };
 };
 
@@ -114,7 +114,7 @@ export default function DashboardClient({
                 <div key={r.id} className="px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer">
                   <div className="text-xs font-bold text-white/70 truncate">{r.restaurant.name}</div>
                   <div className="text-[10px] text-orange-400">
-                    {new Date(r.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} · {r.partySize} pers.
+                    {new Date(r.startsAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} · {r.partySize} pers.
                   </div>
                 </div>
               ))}

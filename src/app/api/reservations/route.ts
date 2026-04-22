@@ -10,7 +10,7 @@ export async function GET() {
   const reservations = await prisma.reservation.findMany({
     where: { userId },
     include: { restaurant: { select: { id: true, name: true, city: true, logoUrl: true } } },
-    orderBy: { date: "desc" },
+    orderBy: { startsAt: "desc" },
   });
 
   return NextResponse.json({ reservations });
@@ -22,26 +22,26 @@ export async function POST(req: NextRequest) {
   const userId = (session.user as any).id as string;
 
   const body = await req.json();
-  const { restaurantId, date, partySize, notes, guestName, guestPhone } = body;
+  const { restaurantId, startsAt, partySize, notes, guestName, guestPhone } = body;
 
-  if (!restaurantId || !date || !partySize) {
-    return NextResponse.json({ error: "restaurantId, date, partySize requis" }, { status: 400 });
+  if (!restaurantId || !startsAt || !partySize) {
+    return NextResponse.json({ error: "restaurantId, startsAt, partySize requis" }, { status: 400 });
   }
 
   const restaurant = await prisma.restaurant.findUnique({ where: { id: restaurantId } });
   if (!restaurant) return NextResponse.json({ error: "Restaurant introuvable" }, { status: 404 });
-  if (!restaurant.acceptsReservations) return NextResponse.json({ error: "Ce restaurant n'accepte pas les réservations en ligne" }, { status: 400 });
+  if (!restaurant.acceptReservations) return NextResponse.json({ error: "Ce restaurant n'accepte pas les réservations en ligne" }, { status: 400 });
 
   const reservation = await prisma.reservation.create({
     data: {
       userId,
       restaurantId,
-      date: new Date(date),
+      startsAt: new Date(startsAt),
       partySize: parseInt(partySize),
       notes: notes || null,
-      guestName: guestName || session.user.name || null,
-      guestEmail: session.user.email || null,
-      guestPhone: guestPhone || null,
+      customerName: guestName || session.user.name || "Client",
+      customerEmail: session.user.email || "",
+      customerPhone: guestPhone || null,
     },
     include: { restaurant: { select: { name: true, city: true } } },
   });

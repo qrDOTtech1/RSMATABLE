@@ -43,9 +43,9 @@ export default async function DashboardPage() {
 
   // Réservations à venir
   const upcomingReservations = await prisma.reservation.findMany({
-    where: { userId, date: { gte: new Date() }, status: { in: ["PENDING", "CONFIRMED"] } },
+    where: { userId, startsAt: { gte: new Date() }, status: { in: ["PENDING", "CONFIRMED"] } },
     include: { restaurant: { select: { id: true, name: true, city: true, logoUrl: true } } },
-    orderBy: { date: "asc" },
+    orderBy: { startsAt: "asc" },
     take: 3,
   });
 
