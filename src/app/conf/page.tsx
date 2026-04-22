@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const metadata = {
   title: "Politique de confidentialité — Ma Table RS",
   description: "Comment Ma Table RS collecte, utilise et protège vos données personnelles.",
@@ -9,7 +11,7 @@ export default function ConfidentialitePage() {
       <div className="max-w-3xl mx-auto px-6 py-16">
         {/* Header */}
         <div className="mb-12">
-          <a href="/" className="text-orange-500 text-sm font-bold hover:text-orange-400 transition-colors">← Retour à l'accueil</a>
+          <Link href="/" className="text-orange-500 text-sm font-bold hover:text-orange-400 transition-colors">← Retour à l'accueil</Link>
           <h1 className="text-4xl font-black mt-6 mb-2">Politique de confidentialité</h1>
           <p className="text-white/40 text-sm">Dernière mise à jour : avril 2026 · Ma Table RS — <span className="font-mono">matable.app</span></p>
         </div>
@@ -118,7 +120,7 @@ export default function ConfidentialitePage() {
         </div>
 
         <div className="mt-16 pt-8 border-t border-white/10 text-center text-white/20 text-xs">
-          © 2026 Ma Table RS · NovaTech OS · <a href="/" className="hover:text-orange-400 transition-colors">matable.app</a>
+          © 2026 Ma Table RS · NovaTech OS · <Link href="/" className="hover:text-orange-400 transition-colors">matable.app</Link>
         </div>
       </div>
     </div>
