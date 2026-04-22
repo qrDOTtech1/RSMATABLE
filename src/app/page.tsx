@@ -292,7 +292,7 @@ export default function SocialLanding() {
           <div className="flex gap-8 font-mono text-xs text-white/20">
             <a className="hover:text-orange-400 transition-colors cursor-pointer">matable.app</a>
             <a href="https://matable.pro" target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">matable.pro</a>
-            <a className="hover:text-white transition-colors cursor-pointer">Confidentialité</a>
+            <a href="/conf" className="hover:text-white transition-colors">Confidentialité</a>
             <a className="hover:text-white transition-colors cursor-pointer">IA Éthique</a>
           </div>
         </div>
