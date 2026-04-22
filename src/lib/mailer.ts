@@ -9,13 +9,30 @@ export function getTransporter() {
     return cachedTransporter;
   }
 
-  const host = process.env.EMAIL_SERVER_HOST;
-  const user = process.env.EMAIL_SERVER_USER;
-  const pass = process.env.EMAIL_SERVER_PASSWORD;
-  const port = parseInt(process.env.EMAIL_SERVER_PORT ?? "587");
+  // Email is disabled by default — require explicit opt-in
+  const emailEnabled = process.env.EMAIL_ENABLED === "true";
+  if (!emailEnabled) {
+    transporterCheckDone = true;
+    cachedTransporter = null;
+    return null;
+  }
 
-  // Require ALL three: host, user, pass
-  if (!host || !user || !pass) {
+  const host = process.env.EMAIL_SERVER_HOST?.trim();
+  const user = process.env.EMAIL_SERVER_USER?.trim();
+  const pass = process.env.EMAIL_SERVER_PASSWORD?.trim();
+  const portStr = process.env.EMAIL_SERVER_PORT?.trim();
+
+  // Require ALL three: host, user, pass (and they must not be empty after trim)
+  if (!host || !user || !pass || !portStr) {
+    console.warn("⚠️  EMAIL_ENABLED=true but missing one of: EMAIL_SERVER_HOST, EMAIL_SERVER_USER, EMAIL_SERVER_PASSWORD, EMAIL_SERVER_PORT");
+    transporterCheckDone = true;
+    cachedTransporter = null;
+    return null;
+  }
+
+  const port = parseInt(portStr);
+  if (isNaN(port)) {
+    console.warn("⚠️  EMAIL_ENABLED=true but EMAIL_SERVER_PORT is not a valid number");
     transporterCheckDone = true;
     cachedTransporter = null;
     return null;
@@ -42,9 +59,9 @@ export async function sendVerificationEmail(email: string, token: string) {
 
   // If no SMTP configured, log a warning but don't crash
   if (!transporter) {
-    console.warn(
-      "⚠️  Email not sent: EMAIL_SERVER_HOST, EMAIL_SERVER_USER, or EMAIL_SERVER_PASSWORD not configured.",
-      `\nVerification link for ${email}:\n${link}`
+    console.log(
+      `⚠️  Email verification disabled (set EMAIL_ENABLED=true to enable)\n` +
+      `📧 For user ${email}, verification link:\n${link}`
     );
     return;
   }
