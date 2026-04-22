@@ -50,8 +50,12 @@ export default function OnboardingPage() {
         body: JSON.stringify(formData),
       });
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Erreur lors de la sauvegarde");
+        let errMsg = "Erreur lors de la sauvegarde";
+        try {
+          const data = await res.json();
+          errMsg = data.error || errMsg;
+        } catch {}
+        throw new Error(errMsg);
       }
       router.push("/dashboard");
     } catch (err: any) {
