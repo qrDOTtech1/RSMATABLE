@@ -19,7 +19,7 @@ export default async function DashboardPage() {
   const restaurants = await prisma.restaurant.findMany({
     where: { isPartner: true },
     include: { dishReviews: { select: { rating: true } } },
-    orderBy: [{ isPremium: "desc" }, { createdAt: "desc" }],
+    orderBy: { createdAt: "desc" },
     take: 20,
   });
 
@@ -59,10 +59,9 @@ export default async function DashboardPage() {
     name: r.name,
     city: r.city,
     logoUrl: r.logoUrl,
-    coverUrl: r.coverUrl,
-    cuisine: r.cuisine,
-    isPremium: r.isPremium,
-    acceptsReservations: r.acceptsReservations,
+    coverUrl: r.coverImageUrl,
+    cuisine: r.description,
+    acceptsReservations: r.acceptReservations,
     avgRating:
       r.dishReviews.length > 0
         ? (r.dishReviews.reduce((s, d) => s + d.rating, 0) / r.dishReviews.length).toFixed(1)
@@ -74,7 +73,7 @@ export default async function DashboardPage() {
     <DashboardClient
       user={{ name: session.user.name, email: session.user.email, image: session.user.image }}
       profile={{ activeMode: profile.activeMode, interests: profile.interests }}
-      restaurants={enrichedRestaurants}
+      restaurants={enrichedRestaurants as any}
       recentReviews={recentReviews as any}
       favorites={favorites as any}
       upcomingReservations={upcomingReservations as any}

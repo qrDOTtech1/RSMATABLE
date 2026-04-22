@@ -7,7 +7,7 @@ import ReservationModal from "@/components/ReservationModal";
 
 type Restaurant = {
   id: string; name: string; city: string | null; logoUrl: string | null;
-  coverUrl: string | null; cuisine: string | null; isPremium: boolean;
+  coverUrl: string | null; cuisine: string | null;
   acceptsReservations: boolean; avgRating: string | null; reviewsCount: number;
 };
 
@@ -69,7 +69,6 @@ export default function DashboardClient({
       <aside className="fixed left-0 top-0 bottom-0 w-64 bg-black border-r border-white/5 hidden lg:flex flex-col p-6 z-40">
         <div className="text-xl font-black tracking-tighter mb-10">
           MA <span className="text-orange-500">TABLE</span>
-          <span className="text-[10px] text-white/20 font-mono ml-2">RS</span>
         </div>
 
         <nav className="space-y-1 flex-1">
@@ -174,11 +173,11 @@ export default function DashboardClient({
             </div>
           )}
 
-          {/* Restaurants Premium */}
+          {/* Restaurants */}
           <section>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-black tracking-tight">
-                Partenaires <span className="text-orange-500">Premium</span>
+                Restaurants <span className="text-orange-500">Partenaires</span>
               </h2>
               <button className="text-xs font-bold text-white/30 hover:text-white uppercase tracking-widest transition-colors">Tout afficher</button>
             </div>
@@ -278,7 +277,7 @@ export default function DashboardClient({
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-rose-600 rounded-xl flex items-center justify-center text-xl shadow-lg">🍽️</div>
           <div className="hidden sm:block">
-            <div className="font-bold text-sm">Ma Table RS</div>
+            <div className="font-bold text-sm">MA TABLE</div>
             <div className={`text-xs ${mode.color}`}>{mode.emoji} Mode {mode.label} actif</div>
           </div>
         </div>
@@ -345,11 +344,6 @@ function RestaurantCard({
             <Heart className="w-4 h-4" fill={isFav ? "currentColor" : "none"} />
           </button>
         </div>
-        {restaurant.isPremium && (
-          <div className="absolute top-2 left-2 bg-orange-500 text-white text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-full">
-            Premium
-          </div>
-        )}
       </div>
       <h3 className="font-bold truncate text-sm mb-1 group-hover:text-orange-400 transition-colors">{restaurant.name}</h3>
       <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase font-bold tracking-tight">
