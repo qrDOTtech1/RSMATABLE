@@ -304,8 +304,8 @@ model OpeningHour {
 
 model DishReview {
   id           String     @id @default(uuid())
-  userId       String
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String?    // nullable: MaTable API reviews have no userId
+  user         User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
   restaurantId String
   restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   menuItemId   String
@@ -371,8 +371,8 @@ model StockMovement {
 
 model Reservation {
   id              String     @id @default(uuid())
-  userId          String
-  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String?    // nullable: MaTable API reservations have no userId
+  user            User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
   restaurantId    String
   restaurant      Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   tableId         String?
