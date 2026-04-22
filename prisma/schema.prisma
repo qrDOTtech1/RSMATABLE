@@ -113,6 +113,7 @@ model Restaurant {
   media          Media[]
   testimonial    Testimonial?
   socialProfiles SocialProfile[] // Active profiles in this restaurant
+  favoriteByUsers     FavoriteRestaurant[]
 
   @@index([slug])
 }
@@ -542,4 +543,3 @@ enum SubscriptionPlan {
   PRO
   PRO_IA
 }
-',filePath:
