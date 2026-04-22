@@ -11,13 +11,12 @@ export async function GET(req: NextRequest) {
     where: {
       isPartner: true,
       ...(city ? { city: { contains: city, mode: "insensitive" } } : {}),
-      ...(premium === "true" ? { isPremium: true } : {}),
     },
     include: {
       dishReviews: { select: { rating: true } },
       _count: { select: { reservations: true } },
     },
-    orderBy: [{ isPremium: "desc" }, { createdAt: "desc" }],
+    orderBy: { createdAt: "desc" },
     take: 20,
   });
 
