@@ -293,6 +293,7 @@ export default function SocialLanding() {
             <a className="hover:text-orange-400 transition-colors cursor-pointer">matable.app</a>
             <a href="https://matable.pro" target="_blank" rel="noopener noreferrer" className="hover:text-orange-400 transition-colors">matable.pro</a>
             <a href="/conf" className="hover:text-white transition-colors">Confidentialité</a>
+            <a href="/cua" className="hover:text-white transition-colors">Conditions d'utilisation</a>
             <a className="hover:text-white transition-colors cursor-pointer">IA Éthique</a>
           </div>
         </div>
