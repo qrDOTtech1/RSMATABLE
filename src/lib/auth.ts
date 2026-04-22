@@ -16,20 +16,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const email = credentials?.email as string;
-        const password = credentials?.password as string;
-        if (!email || !password) return null;
+        try {
+          const email = (credentials?.email as string)?.toLowerCase().trim();
+          const password = credentials?.password as string;
+          if (!email || !password) {
+            console.log("[authorize] missing email/password");
+            return null;
+          }
 
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user) return null;
-        // RSMATABLE uses `password`, legacy rows from MaTable-API use `passwordHash`
-        const hash = (user as any).password ?? (user as any).passwordHash;
-        if (!hash) return null;
+          const user = await prisma.user.findUnique({ where: { email } });
+          if (!user) {
+            console.log("[authorize] no user for", email);
+            return null;
+          }
+          // RSMATABLE uses `password`, legacy rows from MaTable-API use `passwordHash`
+          const hash = (user as any).password ?? (user as any).passwordHash;
+          if (!hash) {
+            console.log("[authorize] user has no password hash:", email, "— keys:", Object.keys(user));
+            return null;
+          }
 
-        const valid = await bcrypt.compare(password, hash);
-        if (!valid) return null;
+          const valid = await bcrypt.compare(password, hash);
+          if (!valid) {
+            console.log("[authorize] bad password for", email);
+            return null;
+          }
 
-        return { id: user.id, email: user.email, name: user.name, image: user.image };
+          console.log("[authorize] OK", email, user.id);
+          return { id: user.id, email: user.email, name: user.name, image: user.image };
+        } catch (e: any) {
+          console.error("[authorize] crash:", e?.message, e);
+          return null;
+        }
       },
     }),
   ],
