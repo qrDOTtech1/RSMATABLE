@@ -54,6 +54,9 @@ function LoginInner() {
     if (params.get("error") === "invalid-token") {
       setMessage({ type: "error", text: "Lien invalide. Vérifiez votre email ou réinscrivez-vous." });
     }
+    if (params.get("error") === "session-expired") {
+      setMessage({ type: "error", text: "Session expirée. Reconnectez-vous." });
+    }
   }, [params]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -68,7 +71,7 @@ function LoginInner() {
     });
     setLoading(false);
     if (res?.error) {
-      setMessage({ type: "error", text: "Email ou mot de passe incorrect, ou email non vérifié." });
+      setMessage({ type: "error", text: "Email ou mot de passe incorrect. Si vous venez de créer votre compte, vérifiez votre email ou réessayez." });
     } else {
       router.push("/dashboard");
     }

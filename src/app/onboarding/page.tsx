@@ -51,10 +51,16 @@ export default function OnboardingPage() {
       });
       if (!res.ok) {
         let errMsg = "Erreur lors de la sauvegarde";
+        let expired = false;
         try {
           const data = await res.json();
           errMsg = data.error || errMsg;
+          expired = data.expired || false;
         } catch {}
+        if (expired) {
+          router.push("/login?error=session-expired");
+          return;
+        }
         throw new Error(errMsg);
       }
       router.push("/dashboard");

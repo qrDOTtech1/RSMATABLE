@@ -4,17 +4,13 @@ import { prisma } from "@/lib/db";
 import { getToken } from "next-auth/jwt";
 
 export async function POST(req: NextRequest) {
-  // Try auth() first, fallback to getToken for JWT sessions
   let userId: string | null = null;
 
   try {
     const session = await auth();
-    if (session?.user) {
-      userId = (session.user as any).id as string;
-    }
+    if (session?.user) userId = (session.user as any).id as string;
   } catch {}
 
-  // Fallback: read JWT token directly from cookie
   if (!userId) {
     try {
       const token = await getToken({ req, secret: process.env.AUTH_SECRET });
@@ -24,7 +20,13 @@ export async function POST(req: NextRequest) {
   }
 
   if (!userId) {
-    return NextResponse.json({ error: "Non autorisé. Reconnectez-vous." }, { status: 401 });
+    return NextResponse.json({ error: "Session expirée. Reconnectez-vous.", expired: true }, { status: 401 });
+  }
+
+  // Verify user actually exists in DB (guards against stale JWT from old resets)
+  const userExists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+  if (!userExists) {
+    return NextResponse.json({ error: "Session invalide. Reconnectez-vous.", expired: true }, { status: 401 });
   }
 
   let body: any;
