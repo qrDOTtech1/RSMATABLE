@@ -1,44 +1,63 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import EmailProvider from "next-auth/providers/email";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db";
+import bcrypt from "bcryptjs";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   trustHost: true,
+  session: { strategy: "jwt" },
   providers: [
     GoogleProvider({
-      clientId: process.env.AUTH_GOOGLE_ID as string,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET as string,
+      clientId: process.env.AUTH_GOOGLE_ID ?? "",
+      clientSecret: process.env.AUTH_GOOGLE_SECRET ?? "",
     }),
-    EmailProvider({
-      server: {
-        host: process.env.EMAIL_SERVER_HOST || process.env.SMTP_HOST || "smtp.ethereal.email",
-        port: parseInt(process.env.EMAIL_SERVER_PORT || process.env.SMTP_PORT || "587"),
-        auth: {
-          user: process.env.EMAIL_SERVER_USER || process.env.SMTP_USER,
-          pass: process.env.EMAIL_SERVER_PASSWORD || process.env.SMTP_PASS,
-        },
+    CredentialsProvider({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
-      from: process.env.EMAIL_FROM || "noreply@matable.app",
+      async authorize(credentials) {
+        const email = credentials?.email as string;
+        const password = credentials?.password as string;
+        if (!email || !password) return null;
+
+        const user = await prisma.user.findUnique({ where: { email } });
+        if (!user || !user.password) return null;
+
+        const valid = await bcrypt.compare(password, user.password);
+        if (!valid) return null;
+
+        if (!user.emailVerified) return null; // email not verified yet
+
+        return { id: user.id, email: user.email, name: user.name, image: user.image };
+      },
     }),
   ],
   callbacks: {
-    session({ session, user }) {
-      if (session.user) {
-        (session.user as any).id = user.id;
+    async jwt({ token, user }) {
+      if (user) token.id = user.id;
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user && token.id) {
+        (session.user as any).id = token.id;
       }
       return session;
     },
-    async signIn({ user }) {
-      // Auto-create SocialProfile on first sign-in
-      if (user?.id) {
-        await prisma.socialProfile.upsert({
-          where: { userId: user.id },
-          create: { userId: user.id },
-          update: {},
-        });
+    async signIn({ user, account }) {
+      // For Google: auto-verify and create profile
+      if (account?.provider === "google" && user?.id) {
+        try {
+          await prisma.socialProfile.upsert({
+            where: { userId: user.id },
+            create: { userId: user.id },
+            update: {},
+          });
+        } catch {}
       }
       return true;
     },
