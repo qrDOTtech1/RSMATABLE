@@ -47,9 +47,16 @@ export default function SocialLanding() {
       <nav className="relative z-10 px-6 py-5 flex justify-between items-center max-w-7xl mx-auto">
         <span className="text-2xl font-black tracking-tighter uppercase">
           MA <span className="text-orange-500">TABLE</span>
-          <span className="text-xs text-white/20 font-mono ml-2 normal-case">RS</span>
         </span>
         <div className="flex items-center gap-3">
+          <a
+            href="https://matable.pro"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-white/40 hover:text-orange-400 transition-colors hidden md:inline"
+          >
+            Partenaire
+          </a>
           <span className="hidden md:inline text-xs text-white/20 font-mono">matable.app</span>
           <Link
             href="/login"
