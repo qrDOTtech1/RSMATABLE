@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Mail, Lock, User, Eye, EyeOff, CheckCircle } from "lucide-react";
@@ -56,6 +56,8 @@ function LoginInner() {
     }
     if (params.get("error") === "session-expired") {
       setMessage({ type: "error", text: "Session expirée. Reconnectez-vous." });
+      // Purge stale JWT cookie so next /dashboard attempt does not loop
+      signOut({ redirect: false }).catch(() => {});
     }
   }, [params]);
 

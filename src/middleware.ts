@@ -15,8 +15,9 @@ export default auth((req: NextRequest & { auth: any }) => {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Redirect logged-in users away from /login
-  if (isLoggedIn && pathname === "/login") {
+  // Redirect logged-in users away from /login — BUT NOT if an error query param is present
+  // (otherwise dashboard → /login?error=session-expired → /dashboard → loop forever)
+  if (isLoggedIn && pathname === "/login" && !req.nextUrl.searchParams.has("error")) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
