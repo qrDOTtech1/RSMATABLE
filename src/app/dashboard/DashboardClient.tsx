@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Home, Search, Compass, Zap, Heart, Calendar, Bell, Settings, LogOut, Star, MapPin, ChefHat, Utensils } from "lucide-react";
 import { logout } from "@/lib/auth-actions";
 import ReservationModal from "@/components/ReservationModal";
+import BottomNav from "@/components/BottomNav";
 
 type Restaurant = {
   id: string; name: string; city: string | null; logoUrl: string | null;
@@ -141,7 +142,7 @@ export default function DashboardClient({
       </aside>
 
       {/* MAIN */}
-      <main className="lg:ml-64 pb-28">
+      <main className="lg:ml-64 pb-36">
         {/* Hero */}
         <section className="relative h-72 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-r from-orange-600 via-rose-600 to-purple-700" />
@@ -272,33 +273,32 @@ export default function DashboardClient({
         </div>
       </main>
 
-      {/* Footer "Now Playing" bar */}
-      <div className="fixed bottom-0 left-0 right-0 h-20 bg-[#121212]/95 backdrop-blur-xl border-t border-white/5 z-50 px-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-rose-600 rounded-xl flex items-center justify-center text-xl shadow-lg">🍽️</div>
-          <div className="hidden sm:block">
-            <div className="font-bold text-sm">MA TABLE</div>
-            <div className={`text-xs ${mode.color}`}>{mode.emoji} Mode {mode.label} actif</div>
+      {/* Mode indicator strip (just above the nav) */}
+      <div
+        className="fixed left-0 right-0 z-40 bg-[#121212]/90 backdrop-blur-xl border-t border-white/5 px-4 py-2 flex items-center justify-between lg:ml-64"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + 60px)" }}
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-rose-600 rounded-lg flex items-center justify-center text-sm shrink-0">🍽️</div>
+          <div className="min-w-0">
+            <div className="font-bold text-xs truncate">MA TABLE</div>
+            <div className={`text-[10px] ${mode.color} truncate`}>{mode.emoji} Mode {mode.label}</div>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Link href="/reservations" className="p-2 text-white/30 hover:text-white transition-colors" title="Mes réservations">
-            <Calendar className="w-5 h-5" />
-          </Link>
-          <Link href="/profile" className="p-2 text-white/30 hover:text-white transition-colors" title="Profil">
-            <Settings className="w-5 h-5" />
-          </Link>
+        <div className="flex items-center gap-2 shrink-0">
           {pendingPings > 0 && (
-            <button className="relative p-2 text-orange-400">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full" />
+            <button className="relative p-1.5 text-orange-400">
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-orange-500 rounded-full" />
             </button>
           )}
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-xs font-black ml-2">
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-[10px] font-black overflow-hidden">
             {user.image ? <img src={user.image} className="w-full h-full rounded-full object-cover" /> : initials}
           </div>
         </div>
       </div>
+
+      <BottomNav />
 
       {/* Reservation Modal */}
       {reservationTarget && (
