@@ -59,10 +59,14 @@ export async function sendVerificationEmail(email: string, token: string) {
 
   // If no SMTP configured, log a warning but don't crash
   if (!transporter) {
-    console.log(
-      `⚠️  Email verification disabled (set EMAIL_ENABLED=true to enable)\n` +
-      `📧 For user ${email}, verification link:\n${link}`
-    );
+    console.log("================================================================================");
+    console.log("⚠️  EMAIL VERIFICATION DISABLED (EMAIL_ENABLED=false or not set)");
+    console.log("================================================================================");
+    console.log(`Email: ${email}`);
+    console.log(`Token: ${token.substring(0, 20)}...`);
+    console.log(`Verification Link:`);
+    console.log(`${link}`);
+    console.log("================================================================================");
     return;
   }
 
