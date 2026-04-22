@@ -20,14 +20,20 @@ export default async function DashboardPage() {
   }
   if (!userId) redirect("/login");
 
-  // Get or create profile — never loop if profile just missing
-  let profile = await prisma.socialProfile.findUnique({ where: { userId } });
+  // Verify user actually exists in DB — guard against stale JWT
+  const userInDb = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
+  if (!userInDb) redirect("/login?error=session-expired");
 
+  // Get or create profile
+  let profile = await prisma.socialProfile.findUnique({ where: { userId } });
   if (!profile) {
-    // Create a blank profile so onboarding can save to it
-    profile = await prisma.socialProfile.create({
-      data: { userId, onboardingDone: false },
-    });
+    try {
+      profile = await prisma.socialProfile.create({
+        data: { userId, onboardingDone: false },
+      });
+    } catch {
+      redirect("/login?error=session-expired");
+    }
   }
 
   if (!profile.onboardingDone) redirect("/onboarding");
