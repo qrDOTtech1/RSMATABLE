@@ -89,6 +89,7 @@ model Restaurant {
   tipsEnabled             Boolean  @default(true)
   serviceCallEnabled      Boolean  @default(true)
   reviewsEnabled          Boolean  @default(true)
+  isPartner               Boolean  @default(true)
 
   subscription          SubscriptionPlan @default(STARTER)
   ollamaApiKey          String?
