@@ -113,7 +113,7 @@ model Restaurant {
   media          Media[]
   testimonial    Testimonial?
   socialProfiles SocialProfile[] // Active profiles in this restaurant
-  favoriteByUsers     FavoriteRestaurant[]
+  favoriteByUsers     FavoriteRestaurant[] @relation("RestaurantFavorites")
 
   @@index([slug])
 }
@@ -424,11 +424,11 @@ model Testimonial {
 }
 
 model FavoriteRestaurant {
-  userId       String
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  restaurantId String
-  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  createdAt    DateTime   @default(now())
+  userId              String
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurantId        String
+  restaurant          Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade, name: "RestaurantFavorites")
+  createdAt           DateTime   @default(now())
 
   @@id([userId, restaurantId])
 }
