@@ -9,11 +9,28 @@ export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
-  const userId = (session.user as any).id as string;
+  // Resolve userId — also try email lookup if id missing
+  let userId = (session.user as any).id as string | undefined;
+  if (!userId && session.user.email) {
+    const u = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { id: true },
+    });
+    userId = u?.id;
+  }
+  if (!userId) redirect("/login");
 
-  // Check onboarding
-  const profile = await prisma.socialProfile.findUnique({ where: { userId } });
-  if (!profile?.onboardingDone) redirect("/onboarding");
+  // Get or create profile — never loop if profile just missing
+  let profile = await prisma.socialProfile.findUnique({ where: { userId } });
+
+  if (!profile) {
+    // Create a blank profile so onboarding can save to it
+    profile = await prisma.socialProfile.create({
+      data: { userId, onboardingDone: false },
+    });
+  }
+
+  if (!profile.onboardingDone) redirect("/onboarding");
 
   // Restaurants partenaires
   const restaurants = await prisma.restaurant.findMany({

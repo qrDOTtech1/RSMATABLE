@@ -3,27 +3,46 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getToken } from "next-auth/jwt";
 
-export async function POST(req: NextRequest) {
-  let userId: string | null = null;
-
+async function resolveUserId(req: NextRequest): Promise<string | null> {
+  // 1. Try auth() session first
   try {
     const session = await auth();
-    if (session?.user) userId = (session.user as any).id as string;
+    const id = (session?.user as any)?.id;
+    if (id) return id;
   } catch {}
 
-  if (!userId) {
-    try {
-      const token = await getToken({ req, secret: process.env.AUTH_SECRET });
-      if (token?.id) userId = token.id as string;
-      else if (token?.sub) userId = token.sub as string;
-    } catch {}
-  }
+  // 2. Fallback: read JWT token
+  try {
+    const token = await getToken({ req, secret: process.env.AUTH_SECRET });
+    if (!token) return null;
+
+    // token.id is set by our jwt callback with the real DB user id
+    if (token.id && typeof token.id === "string") return token.id;
+
+    // token.sub may be email (CredentialsProvider) or actual ID (Google)
+    const sub = token.sub as string | undefined;
+    if (!sub) return null;
+
+    // If sub looks like an email → look up user by email
+    if (sub.includes("@")) {
+      const user = await prisma.user.findUnique({ where: { email: sub }, select: { id: true } });
+      return user?.id ?? null;
+    }
+
+    return sub;
+  } catch {}
+
+  return null;
+}
+
+export async function POST(req: NextRequest) {
+  const userId = await resolveUserId(req);
 
   if (!userId) {
     return NextResponse.json({ error: "Session expirée. Reconnectez-vous.", expired: true }, { status: 401 });
   }
 
-  // Verify user actually exists in DB (guards against stale JWT from old resets)
+  // Guard: user must exist in DB
   const userExists = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
   if (!userExists) {
     return NextResponse.json({ error: "Session invalide. Reconnectez-vous.", expired: true }, { status: 401 });
