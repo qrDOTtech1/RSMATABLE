@@ -1,5 +1,4 @@
 "use server";
-
 import { signIn, signOut } from "@/lib/auth";
 
 export async function loginWithGoogle() {
@@ -9,3 +8,4 @@ export async function loginWithGoogle() {
 export async function logout() {
   await signOut({ redirectTo: "/" });
 }
+

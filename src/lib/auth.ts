@@ -2,9 +2,7 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -31,6 +29,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         (session.user as any).id = user.id;
       }
       return session;
+    },
+    async signIn({ user }) {
+      // Auto-create SocialProfile on first sign-in
+      if (user?.id) {
+        await prisma.socialProfile.upsert({
+          where: { userId: user.id },
+          create: { userId: user.id },
+          update: {},
+        });
+      }
+      return true;
     },
   },
   pages: {
