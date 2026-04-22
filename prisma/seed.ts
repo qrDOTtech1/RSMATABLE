@@ -8,8 +8,6 @@ async function main() {
       name: 'Le Bistro Test',
       slug: 'le-bistro-test',
       city: 'Paris',
-      // isPartner: true, // Default true in schema
-      isPremium: true,
       description: 'Un bistro délicieux pour tester.',
     },
   });
