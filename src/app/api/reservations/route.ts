@@ -9,7 +9,7 @@ export async function GET() {
 
   const reservations = await prisma.reservation.findMany({
     where: { userId },
-    include: { restaurant: { select: { id: true, name: true, city: true, logoUrl: true } } },
+    include: { restaurant: { select: { id: true, name: true, city: true, logoId: true } } },
     orderBy: { startsAt: "desc" },
   });
 

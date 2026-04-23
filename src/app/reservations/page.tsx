@@ -21,7 +21,7 @@ export default async function ReservationsPage() {
 
   const reservations = await prisma.reservation.findMany({
     where: { userId },
-    include: { restaurant: { select: { id: true, name: true, city: true, logoUrl: true } } },
+    include: { restaurant: { select: { id: true, name: true, city: true, slug: true, logoId: true } } },
     orderBy: { startsAt: "desc" },
     take: 50,
   });
@@ -85,7 +85,7 @@ function ReservationCard({ r }: { r: any }) {
   return (
     <li className="bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] rounded-2xl p-4 flex items-center gap-4 transition-colors">
       <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center text-2xl shrink-0">
-        {r.restaurant.logoUrl ? <img src={r.restaurant.logoUrl} className="w-full h-full object-cover" /> : "🍽️"}
+        {(r.restaurant as any).logoId ? <img src={`${process.env.NEXT_PUBLIC_API_URL ?? ""}/api/media/${(r.restaurant as any).logoId}`} className="w-full h-full object-cover" /> : "🍽️"}
       </div>
       <div className="flex-1 min-w-0">
         <div className="font-bold text-sm truncate">{r.restaurant.name}</div>

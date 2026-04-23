@@ -7,8 +7,8 @@ import ReservationModal from "@/components/ReservationModal";
 import BottomNav from "@/components/BottomNav";
 
 type Restaurant = {
-  id: string; name: string; city: string | null; logoUrl: string | null;
-  coverUrl: string | null; cuisine: string | null;
+  id: string; name: string; city: string | null; slug: string | null;
+  logoUrl: string | null; coverUrl: string | null; cuisine: string | null;
   acceptsReservations: boolean; avgRating: string | null; reviewsCount: number;
 };
 
@@ -316,41 +316,42 @@ function RestaurantCard({
 }: {
   restaurant: Restaurant; isFav: boolean; onFav: () => void; onReserve: () => void;
 }) {
+  const href = restaurant.slug ? `/restaurant/${restaurant.slug}` : `/restaurant/${restaurant.id}`;
   return (
-    <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5 hover:bg-white/[0.07] transition-all group cursor-pointer">
-      <div className="relative aspect-square mb-4 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center text-4xl shadow-2xl">
-        {restaurant.logoUrl ? (
-          <img src={restaurant.logoUrl} alt={restaurant.name} className="w-full h-full object-cover" />
-        ) : (
-          <span>🍽️</span>
-        )}
-        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-          {restaurant.acceptsReservations && (
-            <button
-              onClick={(e) => { e.stopPropagation(); onReserve(); }}
-              className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white shadow-xl hover:bg-orange-400 transition-colors"
-              title="Réserver"
-            >
-              <Calendar className="w-4 h-4" />
-            </button>
+    <div className="bg-white/[0.03] p-4 rounded-2xl border border-white/5 hover:bg-white/[0.07] transition-all group">
+      <Link href={href} className="block">
+        <div className="relative aspect-square mb-4 rounded-xl overflow-hidden bg-slate-800 flex items-center justify-center text-4xl shadow-2xl cursor-pointer">
+          {restaurant.coverUrl || restaurant.logoUrl ? (
+            <img src={(restaurant.coverUrl ?? restaurant.logoUrl)!} alt={restaurant.name} className="w-full h-full object-cover" />
+          ) : (
+            <span>🍽️</span>
           )}
-          <button
-            onClick={(e) => { e.stopPropagation(); onFav(); }}
-            className={`w-10 h-10 rounded-full flex items-center justify-center shadow-xl transition-colors ${
-              isFav ? "bg-rose-500 text-white" : "bg-white/10 text-white hover:bg-rose-500"
-            }`}
-            title={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
-          >
-            <Heart className="w-4 h-4" fill={isFav ? "currentColor" : "none"} />
-          </button>
         </div>
-      </div>
-      <h3 className="font-bold truncate text-sm mb-1 group-hover:text-orange-400 transition-colors">{restaurant.name}</h3>
-      <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase font-bold tracking-tight">
-        {restaurant.avgRating && (
-          <span className="flex items-center gap-1"><Star className="w-3 h-3 text-yellow-500" fill="currentColor" />{restaurant.avgRating}</span>
+        <h3 className="font-bold truncate text-sm mb-1 group-hover:text-orange-400 transition-colors">{restaurant.name}</h3>
+        <div className="flex items-center gap-2 text-[10px] text-white/40 uppercase font-bold tracking-tight mb-3">
+          {restaurant.avgRating && (
+            <span className="flex items-center gap-1"><Star className="w-3 h-3 text-yellow-500" fill="currentColor" />{restaurant.avgRating}</span>
+          )}
+          {restaurant.city && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{restaurant.city}</span>}
+        </div>
+      </Link>
+      <div className="flex items-center gap-2">
+        {restaurant.acceptsReservations && (
+          <button
+            onClick={onReserve}
+            className="flex-1 py-1.5 bg-orange-500/20 hover:bg-orange-500/40 text-orange-400 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-colors flex items-center justify-center gap-1"
+          >
+            <Calendar className="w-3 h-3" /> Réserver
+          </button>
         )}
-        {restaurant.city && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{restaurant.city}</span>}
+        <button
+          onClick={onFav}
+          className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+            isFav ? "bg-rose-500/30 text-rose-400" : "bg-white/5 text-white/30 hover:bg-rose-500/20 hover:text-rose-400"
+          }`}
+        >
+          <Heart className="w-3.5 h-3.5" fill={isFav ? "currentColor" : "none"} />
+        </button>
       </div>
     </div>
   );

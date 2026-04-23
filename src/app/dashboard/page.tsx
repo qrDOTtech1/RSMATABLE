@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import DashboardClient from "./DashboardClient";
+import { mediaUrl } from "@/lib/media";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +42,11 @@ export default async function DashboardPage() {
   // Restaurants partenaires
   const restaurants = await prisma.restaurant.findMany({
     where: { isPartner: true },
-    include: { dishReviews: { select: { rating: true } } },
+    select: {
+      id: true, name: true, city: true, slug: true, description: true,
+      logoId: true, coverImageId: true, acceptReservations: true,
+      dishReviews: { select: { rating: true } },
+    },
     orderBy: { createdAt: "desc" },
     take: 20,
   });
@@ -60,14 +65,14 @@ export default async function DashboardPage() {
   // Favoris de l'utilisateur
   const favorites = await prisma.favoriteRestaurant.findMany({
     where: { userId },
-    include: { restaurant: { select: { id: true, name: true, city: true, logoUrl: true } } },
+    include: { restaurant: { select: { id: true, name: true, city: true, logoId: true, slug: true } } },
     take: 5,
   });
 
   // Réservations à venir
   const upcomingReservations = await prisma.reservation.findMany({
     where: { userId, startsAt: { gte: new Date() }, status: { in: ["PENDING", "CONFIRMED"] } },
-    include: { restaurant: { select: { id: true, name: true, city: true, logoUrl: true } } },
+    include: { restaurant: { select: { id: true, name: true, city: true, logoId: true, slug: true } } },
     orderBy: { startsAt: "asc" },
     take: 3,
   });
@@ -81,8 +86,9 @@ export default async function DashboardPage() {
     id: r.id,
     name: r.name,
     city: r.city,
-    logoUrl: r.logoUrl,
-    coverUrl: r.coverImageUrl,
+    slug: r.slug,
+    logoUrl: mediaUrl(r.logoId),
+    coverUrl: mediaUrl(r.coverImageId),
     cuisine: r.description,
     acceptsReservations: r.acceptReservations,
     avgRating:
@@ -92,14 +98,24 @@ export default async function DashboardPage() {
     reviewsCount: r.dishReviews.length,
   }));
 
+  const enrichedFavorites = favorites.map((f) => ({
+    ...f,
+    restaurant: { ...f.restaurant, logoUrl: mediaUrl((f.restaurant as any).logoId) },
+  }));
+
+  const enrichedReservations = upcomingReservations.map((r) => ({
+    ...r,
+    restaurant: { ...r.restaurant, logoUrl: mediaUrl((r.restaurant as any).logoId) },
+  }));
+
   return (
     <DashboardClient
       user={{ name: session.user.name, email: session.user.email, image: session.user.image }}
       profile={{ activeMode: profile.activeMode, interests: profile.interests }}
       restaurants={enrichedRestaurants as any}
       recentReviews={recentReviews as any}
-      favorites={favorites as any}
-      upcomingReservations={upcomingReservations as any}
+      favorites={enrichedFavorites as any}
+      upcomingReservations={enrichedReservations as any}
       pendingPings={pendingPings}
     />
   );

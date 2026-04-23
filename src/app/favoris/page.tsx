@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Heart, MapPin } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
+import { mediaUrl } from "@/lib/media";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +15,7 @@ export default async function FavorisPage() {
 
   const favorites = await prisma.favoriteRestaurant.findMany({
     where: { userId },
-    include: { restaurant: { select: { id: true, name: true, city: true, logoUrl: true, description: true } } },
+    include: { restaurant: { select: { id: true, name: true, city: true, slug: true, logoId: true, description: true } } },
     orderBy: { createdAt: "desc" },
   });
 
@@ -45,23 +46,28 @@ export default async function FavorisPage() {
         ) : (
           <ul className="grid grid-cols-2 gap-3">
             {favorites.map((f) => (
-              <li key={f.restaurantId} className="bg-white/[0.03] border border-white/5 rounded-2xl overflow-hidden hover:bg-white/[0.06] transition-colors">
-                <div className="aspect-square bg-slate-800 flex items-center justify-center text-4xl">
-                  {f.restaurant.logoUrl ? (
-                    <img src={f.restaurant.logoUrl} className="w-full h-full object-cover" />
-                  ) : (
-                    "🍽️"
-                  )}
-                </div>
-                <div className="p-3">
-                  <div className="font-bold text-sm truncate">{f.restaurant.name}</div>
-                  {f.restaurant.city && (
-                    <div className="text-[10px] text-white/40 flex items-center gap-1 mt-0.5">
-                      <MapPin className="w-2.5 h-2.5" />
-                      {f.restaurant.city}
-                    </div>
-                  )}
-                </div>
+              <li key={f.restaurantId}>
+                <Link
+                  href={f.restaurant.slug ? `/restaurant/${f.restaurant.slug}` : `/restaurant/${f.restaurant.id}`}
+                  className="block bg-white/[0.03] border border-white/5 rounded-2xl overflow-hidden hover:bg-white/[0.06] transition-colors"
+                >
+                  <div className="aspect-square bg-slate-800 flex items-center justify-center text-4xl">
+                    {(f.restaurant as any).logoId ? (
+                      <img src={mediaUrl((f.restaurant as any).logoId)!} className="w-full h-full object-cover" />
+                    ) : (
+                      "🍽️"
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <div className="font-bold text-sm truncate">{f.restaurant.name}</div>
+                    {f.restaurant.city && (
+                      <div className="text-[10px] text-white/40 flex items-center gap-1 mt-0.5">
+                        <MapPin className="w-2.5 h-2.5" />
+                        {f.restaurant.city}
+                      </div>
+                    )}
+                  </div>
+                </Link>
               </li>
             ))}
           </ul>
