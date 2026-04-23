@@ -1,35 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getToken } from "next-auth/jwt";
 
-async function resolveUserId(req: NextRequest): Promise<string | null> {
-  try {
-    const session = await auth();
-    const id = (session?.user as any)?.id;
-    if (id) return id;
-  } catch {}
-  try {
-    const token = await getToken({ req, secret: process.env.AUTH_SECRET });
-    if (!token) return null;
-    if (token.id && typeof token.id === "string") return token.id;
-    const sub = token.sub as string | undefined;
-    if (!sub) return null;
-    if (sub.includes("@")) {
-      const user = await prisma.user.findUnique({ where: { email: sub }, select: { id: true } });
-      return user?.id ?? null;
-    }
-    return sub;
-  } catch {}
-  return null;
-}
-
-export async function GET(req: NextRequest) {
-  const userId = await resolveUserId(req);
-  if (!userId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+export async function GET() {
+  const session = await auth();
+  if (!session) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
   const user = await prisma.user.findUnique({
-    where: { id: userId },
+    where: { id: session.userId },
     select: { id: true, name: true, email: true, image: true, profile: true },
   });
   if (!user) return NextResponse.json({ error: "not_found" }, { status: 404 });
@@ -37,16 +15,16 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  const userId = await resolveUserId(req);
-  if (!userId) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+  const session = await auth();
+  if (!session) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+  const userId = session.userId;
 
   try {
     const body = await req.json();
     const { name, image, bio, occupation, interests, activeMode } = body ?? {};
 
-    // Guard image payload size (~1MB max base64)
     if (typeof image === "string" && image.length > 1_400_000) {
-      return NextResponse.json({ error: "Image trop lourde (max ~1 Mo). Réessayez avec une photo plus petite." }, { status: 413 });
+      return NextResponse.json({ error: "Image trop lourde (max ~1 Mo)." }, { status: 413 });
     }
 
     const userUpdate: any = {};
@@ -75,7 +53,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    console.error("[profile PATCH] crash:", e?.message, e);
+    console.error("[profile PATCH] crash:", e?.message);
     return NextResponse.json({ error: e?.message ?? "server_error" }, { status: 500 });
   }
 }

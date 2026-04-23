@@ -4,8 +4,8 @@ import { prisma } from "@/lib/db";
 
 export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const userId = (session.user as any).id as string;
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const userId = session.userId;
   const { id } = await params;
 
   const existing = await prisma.favoriteRestaurant.findUnique({

@@ -2,13 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
-// GET — list received pings
 export async function GET() {
   const session = await auth();
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const userId = (session.user as any).id as string;
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const profile = await prisma.socialProfile.findUnique({ where: { userId } });
+  const profile = await prisma.socialProfile.findUnique({ where: { userId: session.userId } });
   if (!profile) return NextResponse.json({ pings: [] });
 
   const pings = await prisma.socialPing.findMany({
@@ -22,20 +20,18 @@ export async function GET() {
   return NextResponse.json({ pings });
 }
 
-// POST — send a ping
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const userId = (session.user as any).id as string;
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json();
   const { receiverProfileId, message, mode } = body;
 
-  const senderProfile = await prisma.socialProfile.findUnique({ where: { userId } });
+  const senderProfile = await prisma.socialProfile.findUnique({ where: { userId: session.userId } });
   if (!senderProfile) return NextResponse.json({ error: "Profil introuvable" }, { status: 404 });
 
   if (senderProfile.id === receiverProfileId) {
-    return NextResponse.json({ error: "Impossible de se pinger soi-même" }, { status: 400 });
+    return NextResponse.json({ error: "Impossible de se pinger soi-meme" }, { status: 400 });
   }
 
   const ping = await prisma.socialPing.create({

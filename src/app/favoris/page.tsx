@@ -11,8 +11,8 @@ export const dynamic = "force-dynamic";
 export default async function FavorisPage() {
   let session;
   try { session = await auth(); } catch { redirect("/clear-cookies"); }
-  const userId = (session?.user as any)?.id;
-  if (!userId) redirect("/clear-cookies");
+  if (!session) redirect("/login");
+  const userId = session.userId;
 
   const favorites = await prisma.favoriteRestaurant.findMany({
     where: { userId },

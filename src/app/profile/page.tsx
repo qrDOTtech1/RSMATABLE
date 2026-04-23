@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 export default async function ProfilePage() {
   let session;
   try { session = await auth(); } catch { redirect("/clear-cookies"); }
-  const userId = (session?.user as any)?.id;
-  if (!userId) redirect("/clear-cookies");
+  if (!session) redirect("/login");
+  const userId = session.userId;
 
   const user = await prisma.user.findUnique({
     where: { id: userId },

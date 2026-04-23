@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Camera, LogOut, ArrowLeft, Check, X } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
-import { logout } from "@/lib/auth-actions";
+
 
 const MODES = [
   { value: "HIDDEN", label: "Discret", emoji: "👤" },
@@ -120,11 +120,12 @@ export default function ProfileClient({
             <span className="text-sm font-semibold">Retour</span>
           </Link>
           <h1 className="text-base font-bold">Mon profil</h1>
-          <form action={logout}>
-            <button type="submit" className="text-white/50 hover:text-rose-400 p-1" title="Déconnexion">
-              <LogOut className="w-5 h-5" />
-            </button>
-          </form>
+          <button
+            onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); window.location.href = "/login"; }}
+            className="text-white/50 hover:text-rose-400 p-1" title="Deconnexion"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
         </div>
       </header>
 

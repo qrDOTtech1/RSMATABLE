@@ -4,8 +4,8 @@ import { prisma } from "@/lib/db";
 
 export async function GET() {
   const session = await auth();
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const userId = (session.user as any).id as string;
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const userId = session.userId;
 
   const reservations = await prisma.reservation.findMany({
     where: { userId },
@@ -18,8 +18,11 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const userId = (session.user as any).id as string;
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const userId = session.userId;
+
+  // Fetch user info for reservation details
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, email: true } });
 
   const body = await req.json();
   const { restaurantId, startsAt, partySize, notes, guestName, guestPhone } = body;
@@ -30,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   const restaurant = await prisma.restaurant.findUnique({ where: { id: restaurantId } });
   if (!restaurant) return NextResponse.json({ error: "Restaurant introuvable" }, { status: 404 });
-  if (!restaurant.acceptReservations) return NextResponse.json({ error: "Ce restaurant n'accepte pas les réservations en ligne" }, { status: 400 });
+  if (!restaurant.acceptReservations) return NextResponse.json({ error: "Ce restaurant n'accepte pas les reservations en ligne" }, { status: 400 });
 
   const reservation = await prisma.reservation.create({
     data: {
@@ -39,8 +42,8 @@ export async function POST(req: NextRequest) {
       startsAt: new Date(startsAt),
       partySize: parseInt(partySize),
       notes: notes || null,
-      customerName: guestName || session.user.name || "Client",
-      customerEmail: session.user.email || "",
+      customerName: guestName || user?.name || "Client",
+      customerEmail: user?.email || "",
       customerPhone: guestPhone || null,
     },
     include: { restaurant: { select: { name: true, city: true } } },

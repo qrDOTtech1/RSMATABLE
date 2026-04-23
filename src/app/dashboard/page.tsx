@@ -11,25 +11,18 @@ export default async function DashboardPage() {
   try {
     session = await auth();
   } catch {
-    // If auth() crashes (corrupt JWT, oversized cookie) → nuke session
     redirect("/clear-cookies");
   }
-  if (!session?.user) redirect("/login");
+  if (!session) redirect("/login");
 
-  // Resolve userId — also try email lookup if id missing
-  let userId = (session.user as any).id as string | undefined;
-  if (!userId && session.user.email) {
-    const u = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true },
-    });
-    userId = u?.id;
-  }
-  if (!userId) redirect("/clear-cookies");
+  const userId = session.userId;
 
-  // Verify user actually exists in DB — guard against stale JWT
-  const userInDb = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
-  if (!userInDb) redirect("/clear-cookies");
+  // Verify user actually exists in DB
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, name: true, email: true, image: true },
+  });
+  if (!user) redirect("/clear-cookies");
 
   // Get or create profile
   let profile = await prisma.socialProfile.findUnique({ where: { userId } });
@@ -39,7 +32,7 @@ export default async function DashboardPage() {
         data: { userId, onboardingDone: false },
       });
     } catch {
-      redirect("/login?error=session-expired");
+      redirect("/clear-cookies");
     }
   }
 
@@ -57,7 +50,7 @@ export default async function DashboardPage() {
     take: 20,
   });
 
-  // Avis récents
+  // Avis recents
   const recentReviews = await prisma.dishReview.findMany({
     take: 8,
     orderBy: { createdAt: "desc" },
@@ -75,7 +68,7 @@ export default async function DashboardPage() {
     take: 5,
   });
 
-  // Réservations à venir
+  // Reservations a venir
   const upcomingReservations = await prisma.reservation.findMany({
     where: { userId, startsAt: { gte: new Date() }, status: { in: ["PENDING", "CONFIRMED"] } },
     include: { restaurant: { select: { id: true, name: true, city: true, logoId: true, slug: true } } },
@@ -83,7 +76,7 @@ export default async function DashboardPage() {
     take: 3,
   });
 
-  // Pings reçus non vus
+  // Pings recus non vus
   const pendingPings = await prisma.socialPing.count({
     where: { receiver: { userId }, status: "SENT" },
   });
@@ -116,7 +109,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardClient
-      user={{ name: session.user.name, email: session.user.email, image: session.user.image }}
+      user={{ name: user.name, email: user.email, image: user.image }}
       profile={{ activeMode: profile.activeMode, interests: profile.interests }}
       restaurants={enrichedRestaurants as any}
       recentReviews={recentReviews as any}

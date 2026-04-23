@@ -17,8 +17,8 @@ const STATUS_STYLE: Record<string, string> = {
 export default async function ReservationsPage() {
   let session;
   try { session = await auth(); } catch { redirect("/clear-cookies"); }
-  const userId = (session?.user as any)?.id;
-  if (!userId) redirect("/clear-cookies");
+  if (!session) redirect("/login");
+  const userId = session.userId;
 
   const reservations = await prisma.reservation.findMany({
     where: { userId },

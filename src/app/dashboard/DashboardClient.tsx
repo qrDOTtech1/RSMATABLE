@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Home, Search, Compass, Zap, Heart, Calendar, Bell, Settings, LogOut, Star, MapPin, ChefHat, Utensils } from "lucide-react";
-import { logout } from "@/lib/auth-actions";
+import { useRouter } from "next/navigation";
 import ReservationModal from "@/components/ReservationModal";
 import BottomNav from "@/components/BottomNav";
 
@@ -133,11 +133,12 @@ export default function DashboardClient({
               <div className={`text-[10px] ${mode.color}`}>{mode.emoji} {mode.label}</div>
             </div>
           </div>
-          <form action={logout}>
-            <button type="submit" className="w-full flex items-center gap-2 px-3 py-2 text-xs text-white/30 hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/5">
-              <LogOut className="w-4 h-4" /> Se déconnecter
-            </button>
-          </form>
+          <button
+            onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); window.location.href = "/login"; }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs text-white/30 hover:text-red-400 transition-colors rounded-lg hover:bg-red-500/5"
+          >
+            <LogOut className="w-4 h-4" /> Se deconnecter
+          </button>
         </div>
       </aside>
 
