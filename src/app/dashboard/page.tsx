@@ -38,13 +38,14 @@ export default async function DashboardPage() {
 
   if (!profile.onboardingDone) redirect("/onboarding");
 
-  // Restaurants partenaires
+  // Restaurants partenaires — include media for photos
   const restaurants = await prisma.restaurant.findMany({
     where: { isPartner: true },
     select: {
       id: true, name: true, city: true, slug: true, description: true,
       logoId: true, coverImageId: true, acceptReservations: true,
       dishReviews: { select: { rating: true } },
+      media: { select: { id: true }, take: 5 },
     },
     orderBy: { createdAt: "desc" },
     take: 20,
@@ -81,21 +82,32 @@ export default async function DashboardPage() {
     where: { receiver: { userId }, status: "SENT" },
   });
 
-  const enrichedRestaurants = restaurants.map((r) => ({
-    id: r.id,
-    name: r.name,
-    city: r.city,
-    slug: r.slug,
-    logoUrl: mediaUrl(r.logoId),
-    coverUrl: mediaUrl(r.coverImageId),
-    cuisine: r.description,
-    acceptsReservations: r.acceptReservations,
-    avgRating:
-      r.dishReviews.length > 0
-        ? (r.dishReviews.reduce((s, d) => s + d.rating, 0) / r.dishReviews.length).toFixed(1)
-        : null,
-    reviewsCount: r.dishReviews.length,
-  }));
+  const API = process.env.NEXT_PUBLIC_API_URL ?? "";
+
+  const enrichedRestaurants = restaurants.map((r) => {
+    // Build cover image: prefer coverImageId, then first media, then logoId
+    let coverUrl = mediaUrl(r.coverImageId);
+    if (!coverUrl && r.media?.length > 0) {
+      coverUrl = `${API}/api/media/${r.media[0].id}`;
+    }
+    if (!coverUrl) coverUrl = mediaUrl(r.logoId);
+
+    return {
+      id: r.id,
+      name: r.name,
+      city: r.city,
+      slug: r.slug,
+      logoUrl: mediaUrl(r.logoId),
+      coverUrl,
+      cuisine: r.description,
+      acceptsReservations: r.acceptReservations,
+      avgRating:
+        r.dishReviews.length > 0
+          ? (r.dishReviews.reduce((s, d) => s + d.rating, 0) / r.dishReviews.length).toFixed(1)
+          : null,
+      reviewsCount: r.dishReviews.length,
+    };
+  });
 
   const enrichedFavorites = favorites.map((f) => ({
     ...f,

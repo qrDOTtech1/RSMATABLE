@@ -35,7 +35,7 @@ export default function ReservationModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           restaurantId: restaurant.id,
-          date: dateTime.toISOString(),
+          startsAt: dateTime.toISOString(),
           partySize: parseInt(form.partySize),
           notes: form.notes || undefined,
           guestPhone: form.guestPhone || undefined,

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ArrowLeft, MapPin, Phone, Globe, Clock, Star, Calendar, ChefHat } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 
+import RestaurantReserveButton from "./ReserveButton";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 const DAYS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
@@ -90,12 +92,7 @@ export default async function RestaurantPage({ params }: { params: Promise<{ slu
         {/* Contacts + réservation */}
         <div className="flex flex-wrap gap-2">
           {restaurant.acceptReservations && (
-            <Link
-              href={`/dashboard`}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 rounded-xl text-sm font-bold transition-colors"
-            >
-              <Calendar className="w-4 h-4" /> Réserver
-            </Link>
+            <RestaurantReserveButton restaurant={{ id: restaurant.id, name: restaurant.name, city: restaurant.city }} />
           )}
           {restaurant.phone && (
             <a href={`tel:${restaurant.phone}`} className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-sm text-white/70 transition-colors border border-white/10">
