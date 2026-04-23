@@ -9,9 +9,10 @@ import { mediaUrl } from "@/lib/media";
 export const dynamic = "force-dynamic";
 
 export default async function FavorisPage() {
-  const session = await auth();
+  let session;
+  try { session = await auth(); } catch { redirect("/clear-cookies"); }
   const userId = (session?.user as any)?.id;
-  if (!userId) redirect("/login?callbackUrl=/favoris");
+  if (!userId) redirect("/clear-cookies");
 
   const favorites = await prisma.favoriteRestaurant.findMany({
     where: { userId },

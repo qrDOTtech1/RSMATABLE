@@ -7,7 +7,13 @@ import { mediaUrl } from "@/lib/media";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const session = await auth();
+  let session;
+  try {
+    session = await auth();
+  } catch {
+    // If auth() crashes (corrupt JWT, oversized cookie) → nuke session
+    redirect("/clear-cookies");
+  }
   if (!session?.user) redirect("/login");
 
   // Resolve userId — also try email lookup if id missing
@@ -19,11 +25,11 @@ export default async function DashboardPage() {
     });
     userId = u?.id;
   }
-  if (!userId) redirect("/login");
+  if (!userId) redirect("/clear-cookies");
 
   // Verify user actually exists in DB — guard against stale JWT
   const userInDb = await prisma.user.findUnique({ where: { id: userId }, select: { id: true } });
-  if (!userInDb) redirect("/login?error=session-expired");
+  if (!userInDb) redirect("/clear-cookies");
 
   // Get or create profile
   let profile = await prisma.socialProfile.findUnique({ where: { userId } });

@@ -6,9 +6,10 @@ import ProfileClient from "./ProfileClient";
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
-  const session = await auth();
+  let session;
+  try { session = await auth(); } catch { redirect("/clear-cookies"); }
   const userId = (session?.user as any)?.id;
-  if (!userId) redirect("/login?callbackUrl=/profile");
+  if (!userId) redirect("/clear-cookies");
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
