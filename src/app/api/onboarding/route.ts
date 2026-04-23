@@ -55,7 +55,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Corps de requête invalide." }, { status: 400 });
   }
 
-  const { mode, occupation, bio, interests } = body;
+  const { mode, occupation, bio, interests, foodData } = body;
+
+  // Merge food interests into interests array for Nova matching
+  const allInterests = [...(interests || [])];
+  if (foodData?.cuisines?.length) allInterests.push(...foodData.cuisines.map((c: string) => `cuisine:${c}`));
 
   try {
     const profile = await prisma.socialProfile.upsert({
@@ -65,17 +69,17 @@ export async function POST(req: NextRequest) {
         activeMode: mode || "FUN",
         occupation: occupation || null,
         bio: bio || null,
-        interests: interests || [],
+        interests: allInterests,
         onboardingDone: true,
-        onboardingData: body,
+        onboardingData: { mode, occupation, bio, interests, foodData },
       },
       update: {
         activeMode: mode || "FUN",
         occupation: occupation || null,
         bio: bio || null,
-        interests: interests || [],
+        interests: allInterests,
         onboardingDone: true,
-        onboardingData: body,
+        onboardingData: { mode, occupation, bio, interests, foodData },
       },
     });
 
