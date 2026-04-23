@@ -5,11 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "npx prisma generate && next build",
-    "start": "npx prisma db push; next start",
+    "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "^2.11.2",
     "@eslint/eslintrc": "^3",
     "@types/nodemailer": "^6.4.17",
     "@prisma/client": "^5.22.0",
