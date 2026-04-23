@@ -86,20 +86,13 @@ export async function login(email: string, password: string): Promise<{ ok: bool
   const valid = await bcrypt.compare(password, hash);
   if (!valid) return { ok: false, error: "Email ou mot de passe incorrect." };
 
-  // Ensure social profile exists (use externalId keyed on user.id)
+  // Ensure social profile exists (keyed on userId)
   try {
-    const existing = await prisma.socialProfile.findFirst({
-      where: { externalId: user.id },
+    await prisma.socialProfile.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: { userId: user.id },
     });
-    if (!existing) {
-      await prisma.socialProfile.create({
-        data: {
-          externalId: user.id,
-          name: (user as any).name ?? email.split("@")[0],
-          email: user.email ?? undefined,
-        },
-      });
-    }
   } catch {}
 
   await setSessionCookie(user.id);
