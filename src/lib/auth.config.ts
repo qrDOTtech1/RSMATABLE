@@ -7,13 +7,13 @@ export const authConfig = {
   providers: [], // real providers live in auth.ts (Node runtime only)
   callbacks: {
     async jwt({ token, user }) {
-      if (user) (token as any).id = (user as any).id;
-      return token;
+      // Only store id — strip name/email/picture from JWT to prevent 431
+      if (user) return { id: (user as any).id, sub: (user as any).id };
+      return { id: (token as any).id, sub: token.sub };
     },
     async session({ session, token }) {
-      if (session.user && (token as any).id) {
-        (session.user as any).id = (token as any).id;
-      }
+      // Minimal session — only expose id to avoid bloated cookies
+      if (session.user) (session.user as any).id = (token as any).id ?? token.sub;
       return session;
     },
   },
