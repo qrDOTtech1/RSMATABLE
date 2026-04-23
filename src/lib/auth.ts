@@ -7,6 +7,17 @@ const COOKIE_NAME = "sid";
 const SECRET = new TextEncoder().encode(process.env.AUTH_SECRET || "dev-secret-change-me");
 const MAX_AGE = 7 * 24 * 60 * 60; // 7 days
 
+// Old NextAuth cookie names to purge (prevent 431)
+const STALE_COOKIES = [
+  "next-auth.session-token",
+  "__Secure-next-auth.session-token",
+  "next-auth.csrf-token",
+  "__Secure-next-auth.csrf-token",
+  "next-auth.callback-url",
+  "__Secure-next-auth.callback-url",
+  "__Host-next-auth.csrf-token",
+];
+
 // ── Create a minimal JWT (only contains user id) ─────────────────────────────
 export async function createToken(userId: string): Promise<string> {
   return new SignJWT({ uid: userId })
@@ -26,10 +37,16 @@ export async function verifyToken(token: string): Promise<string | null> {
   }
 }
 
-// ── Set session cookie ───────────────────────────────────────────────────────
+// ── Set session cookie + purge stale NextAuth cookies (prevents 431) ─────────
 export async function setSessionCookie(userId: string) {
   const token = await createToken(userId);
   const cookieStore = await cookies();
+
+  // Nuke any lingering NextAuth cookies that bloat request headers → 431
+  for (const name of STALE_COOKIES) {
+    try { cookieStore.delete(name); } catch {}
+  }
+
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -43,6 +60,9 @@ export async function setSessionCookie(userId: string) {
 export async function clearSessionCookie() {
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
+  for (const name of STALE_COOKIES) {
+    try { cookieStore.delete(name); } catch {}
+  }
 }
 
 // ── Get current session (server components & API routes) ─────────────────────
@@ -66,13 +86,20 @@ export async function login(email: string, password: string): Promise<{ ok: bool
   const valid = await bcrypt.compare(password, hash);
   if (!valid) return { ok: false, error: "Email ou mot de passe incorrect." };
 
-  // Ensure social profile exists
+  // Ensure social profile exists (use externalId keyed on user.id)
   try {
-    await prisma.socialProfile.upsert({
-      where: { userId: user.id },
-      create: { userId: user.id },
-      update: {},
+    const existing = await prisma.socialProfile.findFirst({
+      where: { externalId: user.id },
     });
+    if (!existing) {
+      await prisma.socialProfile.create({
+        data: {
+          externalId: user.id,
+          name: (user as any).name ?? email.split("@")[0],
+          email: user.email ?? undefined,
+        },
+      });
+    }
   } catch {}
 
   await setSessionCookie(user.id);
