@@ -119,14 +119,18 @@ export default async function DashboardPage() {
     restaurant: { ...r.restaurant, logoUrl: mediaUrl((r.restaurant as any).logoId) },
   }));
 
-  return (
-    <DashboardClient
-      user={{ name: user.name, email: user.email, image: user.image }}
-      profile={{ activeMode: profile.activeMode, interests: profile.interests }}
-      restaurants={enrichedRestaurants as any}
-      recentReviews={recentReviews as any}
-      favorites={enrichedFavorites as any}
-      upcomingReservations={enrichedReservations as any}
+   return (
+     <DashboardClient
+       user={{ 
+         name: user?.name ?? null, 
+         email: user?.email ?? null, 
+         image: user?.image ?? null 
+       }}
+       profile={{ activeMode: profile.activeMode, interests: profile.interests }}
+       restaurants={enrichedRestaurants as any}
+       recentReviews={recentReviews as any}
+       favorites={enrichedFavorites as any}
+       upcomingReservations={enrichedReservations as any}
       pendingPings={pendingPings}
     />
   );

@@ -363,12 +363,20 @@ function ReviewCard({ review }: { review: Review }) {
   return (
     <div className="bg-white/[0.02] border border-white/5 p-5 rounded-2xl flex gap-4 hover:bg-white/[0.04] transition-all">
       <div className="w-11 h-11 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden">
-        {review.user.image ? <img src={review.user.image} className="w-full h-full object-cover" /> : (review.user.name?.[0] || "U")}
+        {review.user && review.user.image ? (
+          <img src={review.user.image} className="w-full h-full object-cover" />
+        ) : (
+          review.user && review.user.name ? (
+            <span className="text-xs font-bold">{review.user.name?.[0] || "U"}</span>
+          ) : (
+            <span className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-400 to-rose-500 flex items-center justify-center text-xs font-bold">U</span>
+          )
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2 mb-1">
           <p className="text-sm font-bold text-white/80">
-            <span className="text-orange-400">{review.user.name || "Anonyme"}</span>
+            <span className="text-orange-400">{review.user?.name || "Anonyme"}</span>
             {review.menuItem && <> a adoré le <span className="italic text-white">{review.menuItem.name}</span></>}
           </p>
           <span className="text-[10px] text-white/20 shrink-0">{new Date(review.createdAt).toLocaleDateString("fr-FR")}</span>
