@@ -11,10 +11,15 @@ export default async function ProfilePage() {
   if (!session) redirect("/login");
   const userId = session.userId;
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: { profile: true },
-  });
+  let user: any = null;
+  try {
+    user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { profile: true },
+    });
+  } catch (e) {
+    console.error("[profile] user lookup threw:", e);
+  }
   if (!user) redirect("/login");
 
   return (

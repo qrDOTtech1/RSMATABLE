@@ -14,11 +14,16 @@ export default async function FavorisPage() {
   if (!session) redirect("/login");
   const userId = session.userId;
 
-  const favorites = await prisma.favoriteRestaurant.findMany({
-    where: { userId },
-    include: { restaurant: { select: { id: true, name: true, city: true, slug: true, logoId: true, description: true } } },
-    orderBy: { createdAt: "desc" },
-  });
+  let favorites: any[] = [];
+  try {
+    favorites = await prisma.favoriteRestaurant.findMany({
+      where: { userId },
+      include: { restaurant: { select: { id: true, name: true, city: true, slug: true, logoId: true, description: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (e) {
+    console.error("[favoris] query threw:", e);
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0a0b] text-white pb-28">

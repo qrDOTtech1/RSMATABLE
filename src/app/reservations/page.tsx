@@ -20,12 +20,17 @@ export default async function ReservationsPage() {
   if (!session) redirect("/login");
   const userId = session.userId;
 
-  const reservations = await prisma.reservation.findMany({
-    where: { userId },
-    include: { restaurant: { select: { id: true, name: true, city: true, slug: true, logoId: true } } },
-    orderBy: { startsAt: "desc" },
-    take: 50,
-  });
+  let reservations: any[] = [];
+  try {
+    reservations = await prisma.reservation.findMany({
+      where: { userId },
+      include: { restaurant: { select: { id: true, name: true, city: true, slug: true, logoId: true } } },
+      orderBy: { startsAt: "desc" },
+      take: 50,
+    });
+  } catch (e) {
+    console.error("[reservations] query threw:", e);
+  }
 
   const upcoming = reservations.filter((r) => new Date(r.startsAt) >= new Date());
   const past = reservations.filter((r) => new Date(r.startsAt) < new Date());
