@@ -12,6 +12,20 @@ const STALE_COOKIES = [
   "next-auth.callback-url",
   "__Secure-next-auth.callback-url",
   "__Host-next-auth.csrf-token",
+  // PKCE cookies — biggest offenders, accumulate on every failed OAuth attempt
+  "next-auth.pkce.code_verifier",
+  "__Secure-next-auth.pkce.code_verifier",
+  "next-auth.state",
+  "__Secure-next-auth.state",
+  // NextAuth v5 / Auth.js renamed cookies
+  "authjs.session-token",
+  "__Secure-authjs.session-token",
+  "authjs.csrf-token",
+  "__Secure-authjs.csrf-token",
+  "__Host-authjs.csrf-token",
+  "authjs.callback-url",
+  "authjs.pkce.code_verifier",
+  "__Secure-authjs.pkce.code_verifier",
 ];
 
 export function middleware(req: NextRequest) {
