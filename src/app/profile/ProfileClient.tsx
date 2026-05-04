@@ -293,6 +293,15 @@ export default function ProfileClient({
           <Check className="w-4 h-4" />
           {saving ? "Enregistrement…" : "Enregistrer les modifications"}
         </button>
+
+        {/* Déconnexion */}
+        <button
+          onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); window.location.href = "/login"; }}
+          className="w-full py-3 border border-rose-500/30 hover:bg-rose-500/10 text-rose-400 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          Se déconnecter
+        </button>
       </main>
 
       <BottomNav />
