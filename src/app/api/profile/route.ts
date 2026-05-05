@@ -3,23 +3,28 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 export async function GET() {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+  try {
+    const session = await auth();
+    if (!session) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.userId },
-    select: { id: true, name: true, email: true, image: true, profile: true },
-  });
-  if (!user) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  return NextResponse.json(user);
+    const user = await prisma.user.findUnique({
+      where: { id: session.userId },
+      select: { id: true, name: true, email: true, image: true, profile: true },
+    });
+    if (!user) return NextResponse.json({ error: "not_found" }, { status: 404 });
+    return NextResponse.json(user);
+  } catch (e) {
+    console.error("[GET /api/profile] threw:", e);
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+  }
 }
 
 export async function PATCH(req: NextRequest) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
-  const userId = session.userId;
-
   try {
+    const session = await auth();
+    if (!session) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+    const userId = session.userId;
+
     const body = await req.json();
     const { name, image, bio, occupation, interests, activeMode } = body ?? {};
 
@@ -53,7 +58,7 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (e: any) {
-    console.error("[profile PATCH] crash:", e?.message);
+    console.error("[PATCH /api/profile] threw:", e?.message);
     return NextResponse.json({ error: e?.message ?? "server_error" }, { status: 500 });
   }
 }

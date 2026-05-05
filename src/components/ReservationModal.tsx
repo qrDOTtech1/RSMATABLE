@@ -30,6 +30,7 @@ export default function ReservationModal({
     setError(null);
     try {
       const dateTime = new Date(`${form.date}T${form.time}`);
+      if (isNaN(dateTime.getTime())) throw new Error("Date ou heure invalide");
       const res = await fetch("/api/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

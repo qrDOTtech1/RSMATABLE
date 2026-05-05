@@ -36,14 +36,15 @@ export default async function RestaurantPage({ params }: { params: Promise<{ slu
   }
 
   const { restaurant } = data;
-  const menuByCategory = (restaurant.menuItems as any[]).reduce((acc: Record<string, any[]>, item: any) => {
+  if (!restaurant) return notFound();
+  const menuByCategory = ((restaurant.menuItems ?? []) as any[]).reduce((acc: Record<string, any[]>, item: any) => {
     const cat = item.category || "Autres";
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(item);
     return acc;
   }, {});
 
-  const hoursGrouped = (restaurant.openingHours as any[]).reduce((acc: Record<number, any[]>, h: any) => {
+  const hoursGrouped = ((restaurant.openingHours ?? []) as any[]).reduce((acc: Record<number, any[]>, h: any) => {
     if (!acc[h.dayOfWeek]) acc[h.dayOfWeek] = [];
     acc[h.dayOfWeek].push(h);
     return acc;

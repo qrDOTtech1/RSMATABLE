@@ -108,7 +108,7 @@ export default function ProfileClient({
     setNewInterest("");
   }
 
-  const initials = (name || initial.email)[0]?.toUpperCase() ?? "?";
+  const initials = (name || initial.email || "?")[0]?.toUpperCase() ?? "?";
 
   return (
     <div className="min-h-screen bg-[#0a0a0b] text-white pb-28">
